@@ -5,7 +5,7 @@ States of Mind Clothing Wholesale Management Application
 
 To-Do:
 
-* Configure project for push to github
+* ~~Configure project for push to github~~
 
 * Application adminstration page
   	* Button that seeds/reseeds database with relevant test data
