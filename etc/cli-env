@@ -1,0 +1,14 @@
+export proot='~/projects/statesofmind'
+
+domain='${proot}/grails-app/domain/com/statesofmind'
+views='${proot}/grails-app/views/com/statesofmind'
+controllers='${proot}/grails-app/controllers/com/statesofmind'
+
+
+function vid { 
+    vi "${domain}/${1}" 
+}
+
+function vic { 
+    vi "${controllers}/${1}" 
+}

@@ -1,0 +1,22 @@
+
+1) Order List
+    - Filter by Order Status
+    - Client Information
+    - Order Status
+    - Activities
+        - Shirts Ordered
+        - Sent to Printer
+        - Shipped
+    - Financials
+        - Revenue
+            - Payments Received
+            - Remaining Balance
+        - Breakout of Expenses
+            - Garments
+            - Printing
+            - Other
+        - Profit
+            - Dollars
+            - Percent
+
+
