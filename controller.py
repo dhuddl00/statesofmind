@@ -21,7 +21,21 @@ class PrintTagHandler(webapp2.RequestHandler):
     path = os.path.join(os.path.dirname(__file__), 'printTags.html')
     self.response.out.write(template.render(path, template_values))
 
+class DillardsTagXMLHandler(webapp2.RequestHandler):
+  def get(self):
+    path = os.path.join(os.path.dirname(__file__), 'dillardsLabel.xml')
+    self.response.headers['Content-Type'] = "application/xml"    
+    self.response.out.write(file(path).read())
+
+class BoutiqueTagXMLHandler(webapp2.RequestHandler):
+  def get(self):
+    path = os.path.join(os.path.dirname(__file__), 'boutiqueLabel.xml')
+    self.response.headers['Content-Type'] = "application/xml"    
+    self.response.out.write(file(path).read())
+
 app = webapp2.WSGIApplication([
   ('/', MainHandler),
-  (r'/printTags', PrintTagHandler)
+  (r'/printTags', PrintTagHandler),
+  (r'/dillardsTagXML', DillardsTagXMLHandler),
+  (r'/boutiqueTagXML', BoutiqueTagXMLHandler)
 ], debug=True)
