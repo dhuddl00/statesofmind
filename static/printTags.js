@@ -8,12 +8,6 @@ function init() {
     getUPCs();
 }
 
-function pad(num, size) {
-     var s = num+"";
-     while (s.length < size) s = "0" + s;
-     return s;
-}
-
 function getTagXML(newTagStyle) {
     var xmlhttp = new XMLHttpRequest();
     var url;
@@ -42,8 +36,7 @@ function getUPCs() {
     //initialize upcs object
     upcs = new Object();
 
-    //var url = "https://spreadsheets.google.com/feeds/list/0ApQT17osW5EmdDdaVjBQb2dOZlBWZ1VSSzhKaXZFUnc/od6/public/basic?alt=json";
-    var url = "http://localhost:8080/upcList";
+    var url = "upcList";
     var xmlhttp = new XMLHttpRequest();
     xmlhttp.open('GET',url,true);
     xmlhttp.send(null);
@@ -52,52 +45,26 @@ function getUPCs() {
     if (xmlhttp.readyState == 4) {
     if (xmlhttp.status == 200) {
             
-        var keyList = [];
-        /*
-
-        var det = eval( "(" +  xmlhttp.responseText + ")");
-                    
-        var entryList = det.feed.entry; 
-        for (var r = 0; r < entryList.length; r++)
-        {
-            var upcString = entryList[r].content.$t; 
-            var upcFields = upcString.split(',');
-              
-            var upc = new Object();
-            for (var i = 0; i < upcFields.length; i++)
-            {
-                var keyval = upcFields[i].split(':');
-                eval("upc." + keyval[0] + ' = "' + keyval[1].replace(/^\s+|\s+$/g,'') + '"');
-            }
-  
-            upc.dept = pad(upc.dept,4);
-            upc.mic = pad(upc.mic,3);   
-            upc.unitretail = formatDollar(upc.unitretail);
-            if(! upc.hasOwnProperty("sku")) 
-                upc.sku = "n/a";
-
-
-            //default on order to 0 if not defined
-            if (! upc.hasOwnProperty("oounits")) 
-                upc.oounits = 0;
-            
-            //add upc to the hash
-            keyList[r] = upc.upc;
-
-        } */
+        var rows = [];
     
        //  var upcList = xmlhttp.responseText;
         var upcList = JSON.parse(xmlhttp.responseText);
         for(var i=0; i<upcList.length; i++) {
             var upc = upcList[i];
+
+            //add entry in the rows list
+            rows[i] = {"upc" : upc.upc, "qty" : upc.oounits};
+
+            //remove oounits from the upc object
+            delete upc.oounits;
+
+            //add upc to the upc master list, overwritting any existing values
             upcs[upc.upc] = upc;
-            //putting upc in array to maintain sort order
-            keyList[i] = upc.upc;
         }
         //Go get Print Quantities
 
         //Print UPCs table to screen
-        printUPCTable(keyList);
+        printUPCTable(rows);
         }
           else
              alert("Error ->" + xmlhttp.responseText);
@@ -106,7 +73,7 @@ function getUPCs() {
      
 }
 
-function printUPCTable(keyList) {
+function printUPCTable(rows) {
 
         var html = "<table id='upcs'>";
     
@@ -129,9 +96,9 @@ function printUPCTable(keyList) {
     
         var upc;
 
-        for (var i = 0; i < keyList.length; i++)
+        for (var i = 0; i < rows.length; i++)
         {
-            upc = upcs[keyList[i]];            
+            upc = upcs[rows[i].upc];            
             html += "<tr>";
             html += "<td>" + (i+1) + "</td>";
             html += "<td>" + upc.dept + "</td>";
@@ -143,7 +110,7 @@ function printUPCTable(keyList) {
             html += "<td>" + upc.sku + "</td>";
             html += "<td>" + upc.upc + "</td>";
             html += "<td>" + upc.unitretail + "</td>";
-            html += "<td><INPUT TYPE=text id=oo" + upc.upc + " VALUE= " + upc.oounits + " size=2 style=text-align:right></td>";
+            html += "<td><INPUT TYPE=text id=qty" + upc.upc + " VALUE= " + rows[i].qty + " size=2 style=text-align:right></td>";
             html += "<td><input type=button value=print onclick=printLabels(" + upc.upc + ")></td>";
             html += "<td><span id=printed" + upc.upc + "></span></td>";
             html += "</tr>";
@@ -151,15 +118,12 @@ function printUPCTable(keyList) {
 
         html += "</table>";
         document.getElementById("results").innerHTML = html;
-        
-    
 }
       
 function printLabels(upc) {
     document.getElementById("printed" + upc).innerHTML = "printing...";
-    var qty = document.getElementById("oo" + upc).value
-    //alert("Printing " + qty + " labels for UPC " + upc + " style_desc " + upcs[upc].styledesc);
-                    
+    var qty = document.getElementById("qty" + upc).value
+
     try
     {
         // open label
@@ -184,7 +148,7 @@ function printLabels(upc) {
         // for simplicity sake just use the first LabelWriter printer
         var printers = dymo.label.framework.getPrinters();
         if (printers.length == 0)
-            throw "No DYMO printers are installed. Install DYMO printers.";
+            throw "No DYMO printers are installed.";
 
         var printerName = "";
         for (var i = 0; i < printers.length; ++i)
@@ -211,10 +175,4 @@ function printLabels(upc) {
     }
     
     document.getElementById("printed" + upc).innerHTML = "done";
-}
-    
-function formatDollar(strNum) {
-    var num = Number(strNum.replace(/\$/g, ''));
-    var formatted = "$"  + num.toFixed(2).toString(); 
-    return formatted;   
 }
