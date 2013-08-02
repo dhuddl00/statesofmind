@@ -11,6 +11,13 @@
     <h2>Print Hangtags</h2>
     <span><a href="https://docs.google.com/spreadsheet/ccc?key=0ApQT17osW5EmdDdaVjBQb2dOZlBWZ1VSSzhKaXZFUnc#gid=0" target="_blank">Data Sheet</a></span>
     <span id="tag" style="padding-left: 50px">loading tag...</span> 
+    <span style="padding-left: 50px">
+        <input type="file" id="fileinput" />
+    </span>
+    <script>
+        document.getElementById('fileinput').addEventListener('change', handleFileSelect, false);
+    </script>
+
     <div id="results">loading UPCs...</div>
   </body>
   <style>

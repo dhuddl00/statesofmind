@@ -8,6 +8,40 @@ function init() {
     getUPCs();
 }
 
+function handleFileSelect(evt) {
+    //Retrieve the first (and only!) File from the FileList object
+    var f = evt.target.files[0]; 
+
+    if (f) {
+      var r = new FileReader();
+      r.onload = function(e) { 
+        updateListWithCsv(e.target.result);
+      }
+      r.readAsText(f);
+    } else { 
+      alert("Failed to load file");
+    }
+}
+
+function updateListWithCsv(csvData) {
+    var xmlhttp = new XMLHttpRequest();
+    var url = "orderListFromCsv";
+    xmlhttp.open("POST",url,true);
+    xmlhttp.setRequestHeader("Content-type","application/csv");
+    xmlhttp.send(csvData);
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == 4) {
+        if (xmlhttp.status == 200) {
+            var rows = JSON.parse(xmlhttp.responseText); 
+
+            //Print UPCs table to screen
+            printUPCTable(rows);
+        }
+          else
+             alert("Error ->" + xmlhttp.responseText);
+        }}; 
+}
+
 function getTagXML(newTagStyle) {
     var xmlhttp = new XMLHttpRequest();
     var url;
@@ -45,10 +79,23 @@ function getUPCs() {
     if (xmlhttp.readyState == 4) {
     if (xmlhttp.status == 200) {
             
-        var rows = [];
-    
+        var rows = getRowsFromJson(xmlhttp.responseText); 
+
+        //Print UPCs table to screen
+        printUPCTable(rows);
+
+        }
+          else
+             alert("Error ->" + xmlhttp.responseText);
+    }
+    };
+     
+}
+
+function getRowsFromJson(jsonData) {
        //  var upcList = xmlhttp.responseText;
-        var upcList = JSON.parse(xmlhttp.responseText);
+        var upcList = JSON.parse(jsonData);
+        var rows = [];
         for(var i=0; i<upcList.length; i++) {
             var upc = upcList[i];
 
@@ -61,16 +108,7 @@ function getUPCs() {
             //add upc to the upc master list, overwritting any existing values
             upcs[upc.upc] = upc;
         }
-        //Go get Print Quantities
-
-        //Print UPCs table to screen
-        printUPCTable(rows);
-        }
-          else
-             alert("Error ->" + xmlhttp.responseText);
-    }
-    };
-     
+        return rows;
 }
 
 function printUPCTable(rows) {
@@ -99,6 +137,11 @@ function printUPCTable(rows) {
         for (var i = 0; i < rows.length; i++)
         {
             upc = upcs[rows[i].upc];            
+            if (!upc) {
+                alert("ERROR: UPC " + rows[i].upc + " does not exist on master UPC list in Google Docs"); 
+                upc = getBlankUpc(rows[i]);
+            }
+
             html += "<tr>";
             html += "<td>" + (i+1) + "</td>";
             html += "<td>" + upc.dept + "</td>";
@@ -118,6 +161,11 @@ function printUPCTable(rows) {
 
         html += "</table>";
         document.getElementById("results").innerHTML = html;
+}
+
+function getBlankUpc(row) {
+    return {"dept":"0000","mic":"000","style":"undefined","styledesc":"undefined","color":"undefined",
+                "size":"undefined","sku":"undefined","upc":row.upc,"unitretail":"$0.00","qty":row.qty};
 }
       
 function printLabels(upc) {

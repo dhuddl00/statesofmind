@@ -35,37 +35,26 @@ class BoutiqueTagXMLHandler(webapp2.RequestHandler):
 class UpcListHandler(webapp2.RequestHandler):
   def get(self):
     import json
-    import urllib
-    from pprint import pprint
-    upcs = []
-
-    #with open('upcs.txt') as data_file:
-    gsheeturl = 'https://spreadsheets.google.com/feeds/list/0ApQT17osW5EmdDdaVjBQb2dOZlBWZ1VSSzhKaXZFUnc/od6/public/basic?alt=json'
-    #with urllib.urlopen(gsheeturl) as data_file:
-    #    data = json.load(data_file)
-    data = json.load(urllib.urlopen(gsheeturl))
-
-    for i in range(len(data["feed"]["entry"])):
-        upc = {}
-        almostJSON = data["feed"]["entry"][i]["content"]["$t"]
-        keyvals = almostJSON.split(",")
-        for keyval in keyvals:
-            key = keyval.split(":")[0].strip().encode('ascii','ignore')
-            value = keyval.split(":")[1].strip().encode('ascii','ignore')
-            upc[key] = value
-       
-        #clean up and add to the array
-        upcs.append(toUpc(upc))
-
+    upcs = getUpcListFromGoogleSpreadsheet()
 
     #send the upc array as the http response
     self.response.headers['Content-Type'] = "application/json"    
     self.response.out.write(json.dumps(upcs))
 
+class OrderListFromCsvHandler(webapp2.RequestHandler):
+  def post(self):
+
+    import json
+    orderList = getOrderListFromCsv(self.request.body_file.read())
+
+    self.response.headers['Content-Type'] = "application/json"    
+    self.response.out.write(json.dumps(orderList))
+
 app = webapp2.WSGIApplication([
   ('/', MainHandler),
   (r'/printTags', PrintTagHandler),
   (r'/upcList', UpcListHandler),
+  (r'/orderListFromCsv', OrderListFromCsvHandler),
   (r'/dillardsTagXML', DillardsTagXMLHandler),
   (r'/boutiqueTagXML', BoutiqueTagXMLHandler)
 ], debug=True)
@@ -92,3 +81,44 @@ def toUpc(inUpc):
 
     return upc
     
+def getOrderListFromCsv(csvData):
+    lines = csvData.splitlines()
+    headings = lines[0].split(",")
+    upcIndex = headings.index("UPCCode")
+    qtyIndex = headings.index("QuantityOrdered")
+    ordLines = []
+    for r in range(1, len(lines)):
+        cols = lines[r].split(",")
+        ordLine = {}
+        ordLine['upc'] = int(cols[upcIndex].replace("'","").replace('"',"").strip())
+        ordLine['qty'] = int(cols[qtyIndex].replace("'","").replace('"',"").strip())
+        ordLines.append(ordLine)
+    
+    return ordLines 
+
+def getUpcListFromGoogleSpreadsheet():
+    import json
+    import urllib
+    from pprint import pprint
+    upcs = []
+
+    #with open('upcs.txt') as data_file:
+    gsheeturl = 'https://spreadsheets.google.com/feeds/list/0ApQT17osW5EmdDdaVjBQb2dOZlBWZ1VSSzhKaXZFUnc/od6/public/basic?alt=json'
+    #with urllib.urlopen(gsheeturl) as data_file:
+    #    data = json.load(data_file)
+    data = json.load(urllib.urlopen(gsheeturl))
+
+    for i in range(len(data["feed"]["entry"])):
+        upc = {}
+        almostJSON = data["feed"]["entry"][i]["content"]["$t"]
+        keyvals = almostJSON.split(",")
+        for keyval in keyvals:
+            key = keyval.split(":")[0].strip().encode('ascii','ignore')
+            value = keyval.split(":")[1].strip().encode('ascii','ignore')
+            upc[key] = value
+       
+        #clean up and add to the array
+        upcs.append(toUpc(upc))
+
+    return upcs
+
