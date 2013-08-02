@@ -14,7 +14,6 @@ class MainHandler(webapp2.RequestHandler):
 
 class PrintTagHandler(webapp2.RequestHandler):
   def get(self):
-    #dxmlpath = os.path.join(os.path.dirname(__file__), 'dillardsTag.xml')
     template_values = {
     }
     
@@ -33,9 +32,32 @@ class BoutiqueTagXMLHandler(webapp2.RequestHandler):
     self.response.headers['Content-Type'] = "application/xml"    
     self.response.out.write(file(path).read())
 
+class UpcListHandler(webapp2.RequestHandler):
+  def get(self):
+    import json
+    upcs = []
+
+    with open('upcs.txt') as data_file:
+        data = json.load(data_file)
+
+    for i in [0,1,2,3,4,5,6]:
+        row = {}
+        almostJSON = data["feed"]["entry"][i]["content"]["$t"]
+        keyvals = almostJSON.split(",")
+        for keyval in keyvals:
+            key = keyval.split(":")[0].strip()
+            value = keyval.split(":")[1].strip()
+            row[key] = value
+        upcs.append(row)
+
+    self.response.headers['Content-Type'] = "application/json"    
+    self.response.out.write(json.dumps(upcs))
+
 app = webapp2.WSGIApplication([
   ('/', MainHandler),
   (r'/printTags', PrintTagHandler),
+  (r'/upcList', UpcListHandler),
   (r'/dillardsTagXML', DillardsTagXMLHandler),
   (r'/boutiqueTagXML', BoutiqueTagXMLHandler)
 ], debug=True)
+
