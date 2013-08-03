@@ -98,15 +98,15 @@ def getOrderListFromCsv(csvData):
 
 def getUpcListFromGoogleSpreadsheet():
     import json
-    import urllib
+    import urllib2
     from pprint import pprint
     upcs = []
 
     #with open('upcs.txt') as data_file:
-    gsheeturl = 'https://spreadsheets.google.com/feeds/list/0ApQT17osW5EmdDdaVjBQb2dOZlBWZ1VSSzhKaXZFUnc/od6/public/basic?alt=json'
+    gsheeturl = 'http://spreadsheets.google.com/feeds/list/0ApQT17osW5EmdDdaVjBQb2dOZlBWZ1VSSzhKaXZFUnc/od6/public/basic?alt=json'
     #with urllib.urlopen(gsheeturl) as data_file:
     #    data = json.load(data_file)
-    data = json.load(urllib.urlopen(gsheeturl))
+    data = json.load(urllib2.urlopen(gsheeturl, timeout = 60))
 
     for i in range(len(data["feed"]["entry"])):
         upc = {}
