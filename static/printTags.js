@@ -1,10 +1,9 @@
-//global var for upc list
 var upcs;
+var rows;
 var tagXML = "";
 var tagStyle = "Dillards";
 
 function init() {
-    getTagXML("Dillards");
     getUPCs();
 }
 
@@ -32,27 +31,27 @@ function updateListWithCsv(csvData) {
     xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState == 4) {
         if (xmlhttp.status == 200) {
-            var rows = JSON.parse(xmlhttp.responseText); 
+            rows = JSON.parse(xmlhttp.responseText); 
 
             //Print UPCs table to screen
-            printUPCTable(rows);
+            printUPCTable();
         }
           else
              alert("Error ->" + xmlhttp.responseText);
         }}; 
 }
 
-function getTagXML(newTagStyle) {
+function setTagStyle(newTagStyle) {
     var xmlhttp = new XMLHttpRequest();
     var url;
     var button;
     tagStyle = newTagStyle;
     if ( tagStyle === 'Dillards' ) {
         url = "dillardsTagXML";
-        button = '<input type=button value=Dillards onclick=getTagXML("Boutique")>';
+        button = '<input type=button value=Dillards onclick=setTagStyle("Boutique")>';
     } else {
         url = "boutiqueTagXML";
-        button = '<input type=button value=Boutique onclick=getTagXML("Dillards")>';
+        button = '<input type=button value=Boutique onclick=setTagStyle("Dillards")>';
     }
 
     xmlhttp.open('GET',url,true);
@@ -62,6 +61,7 @@ function getTagXML(newTagStyle) {
         if (xmlhttp.status == 200) {
             tagXML = xmlhttp.responseText;
             document.getElementById("tag").innerHTML = "Tag Style: " + button;
+            printUPCTable();
         }}}; 
 }
 
@@ -79,10 +79,11 @@ function getUPCs() {
     if (xmlhttp.readyState == 4) {
     if (xmlhttp.status == 200) {
             
-        var rows = getRowsFromJson(xmlhttp.responseText); 
+        setUPCsFromJson(xmlhttp.responseText); 
+        setRowsFromJson(xmlhttp.responseText); 
 
-        //Print UPCs table to screen
-        printUPCTable(rows);
+        //Sets tag style and prints table
+        setTagStyle("Dillards");
 
         }
           else
@@ -92,39 +93,43 @@ function getUPCs() {
      
 }
 
-function getRowsFromJson(jsonData) {
-       //  var upcList = xmlhttp.responseText;
-        var upcList = JSON.parse(jsonData);
-        var rows = [];
-        for(var i=0; i<upcList.length; i++) {
-            var upc = upcList[i];
-
+function setRowsFromJson(jsonData) {
+        rows = [];
+        var list = JSON.parse(jsonData);
+        for(var i=0; i<list.length; i++) {
+            var upc = list[i];
+        
             //add entry in the rows list
             rows[i] = {"upc" : upc.upc, "qty" : upc.oounits};
 
-            //remove oounits from the upc object
-            delete upc.oounits;
+        }
+}
 
+function setUPCsFromJson(jsonData) {
+        var list = JSON.parse(jsonData);
+        for(var i=0; i<list.length; i++) {
+            var upc = list[i];
+        
             //add upc to the upc master list, overwritting any existing values
             upcs[upc.upc] = upc;
         }
-        return rows;
 }
 
-function printUPCTable(rows) {
+function printUPCTable() {
 
         var html = "<table id='upcs'>";
     
         //Print header row
         html += "<tr>";
         html += "<th>Row</th>";
-        html += "<th>Dept</th>";
-        html += "<th>MIC</th>";
+        if ( tagStyle === 'Dillards' ) {
+            html += "<th>Dept</th>";
+            html += "<th>MIC</th>";
+        }
         html += "<th>Style</th>";
         html += "<th>Style Desc</th>";
         html += "<th>Color</th>";
         html += "<th>Size</th>";
-        html += "<th>SKU</th>";
         html += "<th>UPC</th>";
         html += "<th>Retail</th>";
         html += "<th>Qty</th>";
@@ -144,13 +149,14 @@ function printUPCTable(rows) {
 
             html += "<tr>";
             html += "<td>" + (i+1) + "</td>";
-            html += "<td>" + upc.dept + "</td>";
-            html += "<td>" + upc.mic + "</td>";
+            if ( tagStyle === 'Dillards' ) {
+                html += "<td>" + upc.dept + "</td>";
+                html += "<td>" + upc.mic + "</td>";
+            }
             html += "<td>" + upc.style + "</td>";
             html += "<td>" + upc.styledesc + "</td>";
             html += "<td>" + upc.color + "</td>";
             html += "<td>" + upc.size + "</td>";
-            html += "<td>" + upc.sku + "</td>";
             html += "<td>" + upc.upc + "</td>";
             html += "<td>" + upc.unitretail + "</td>";
             html += "<td><INPUT TYPE=text id=qty" + upc.upc + " VALUE= " + rows[i].qty + " size=2 style=text-align:right></td>";
@@ -165,7 +171,7 @@ function printUPCTable(rows) {
 
 function getBlankUpc(row) {
     return {"dept":"0000","mic":"000","style":"undefined","styledesc":"undefined","color":"undefined",
-                "size":"undefined","sku":"undefined","upc":row.upc,"unitretail":"$0.00","qty":row.qty};
+                "size":"undefined","upc":row.upc,"unitretail":"$0.00","qty":row.qty};
 }
       
 function printLabels(upc) {
@@ -181,9 +187,7 @@ function printLabels(upc) {
         if (tagStyle === "Dillards") {
             label.setObjectText('DEPT', upcs[upc].dept);
             label.setObjectText('MIC', upcs[upc].mic);
-        } else {
-            label.setObjectText('SKU', upcs[upc].sku);
-        }
+        } 
 
         label.setObjectText('STYLE', upcs[upc].style);
         label.setObjectText('COLOR', upcs[upc].color);

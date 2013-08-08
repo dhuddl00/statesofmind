@@ -134,58 +134,6 @@
   </ObjectInfo>
   <ObjectInfo>
     <TextObject>
-      <Name>TEXT_1</Name>
-      <ForeColor Alpha="255" Red="0" Green="0" Blue="0"/>
-      <BackColor Alpha="0" Red="255" Green="255" Blue="255"/>
-      <LinkedObjectName></LinkedObjectName>
-      <Rotation>Rotation0</Rotation>
-      <IsMirrored>False</IsMirrored>
-      <IsVariable>False</IsVariable>
-      <HorizontalAlignment>Left</HorizontalAlignment>
-      <VerticalAlignment>Middle</VerticalAlignment>
-      <TextFitMode>ShrinkToFit</TextFitMode>
-      <UseFullFontHeight>True</UseFullFontHeight>
-      <Verticalized>False</Verticalized>
-      <StyledText>
-        <Element>
-          <String>SKU:</String>
-          <Attributes>
-            <Font Family="Lucida Grande" Size="8" Bold="False" Italic="False" Underline="False" Strikeout="False"/>
-            <ForeColor Alpha="255" Red="0" Green="0" Blue="0"/>
-          </Attributes>
-        </Element>
-      </StyledText>
-    </TextObject>
-    <Bounds X="86.39999" Y="119.4399" Width="582.8901" Height="248.9143"/>
-  </ObjectInfo>
-  <ObjectInfo>
-    <TextObject>
-      <Name>SKU</Name>
-      <ForeColor Alpha="255" Red="0" Green="0" Blue="0"/>
-      <BackColor Alpha="0" Red="255" Green="255" Blue="255"/>
-      <LinkedObjectName></LinkedObjectName>
-      <Rotation>Rotation0</Rotation>
-      <IsMirrored>False</IsMirrored>
-      <IsVariable>True</IsVariable>
-      <HorizontalAlignment>Left</HorizontalAlignment>
-      <VerticalAlignment>Middle</VerticalAlignment>
-      <TextFitMode>None</TextFitMode>
-      <UseFullFontHeight>True</UseFullFontHeight>
-      <Verticalized>False</Verticalized>
-      <StyledText>
-        <Element>
-          <String>766</String>
-          <Attributes>
-            <Font Family="Lucida Grande" Size="8" Bold="False" Italic="False" Underline="False" Strikeout="False"/>
-            <ForeColor Alpha="255" Red="0" Green="0" Blue="0"/>
-          </Attributes>
-        </Element>
-      </StyledText>
-    </TextObject>
-    <Bounds X="636.1511" Y="119.4399" Width="1077.449" Height="248.9143"/>
-  </ObjectInfo>
-  <ObjectInfo>
-    <TextObject>
       <Name>TEXT_1_1</Name>
       <ForeColor Alpha="255" Red="0" Green="0" Blue="0"/>
       <BackColor Alpha="0" Red="255" Green="255" Blue="255"/>
