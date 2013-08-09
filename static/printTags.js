@@ -44,14 +44,14 @@ function updateListWithCsv(csvData) {
 function setTagStyle(newTagStyle) {
     var xmlhttp = new XMLHttpRequest();
     var url;
-    var button;
+    var buttonHtml;
     tagStyle = newTagStyle;
     if ( tagStyle === 'Dillards' ) {
         url = "dillardsTagXML";
-        button = '<input type=button value=Dillards onclick=setTagStyle("Boutique")>';
+        buttonHtml = '<input type=button value=Dillards onclick=setTagStyle("Boutique")>';
     } else {
         url = "boutiqueTagXML";
-        button = '<input type=button value=Boutique onclick=setTagStyle("Dillards")>';
+        buttonHtml = '<input type=button value=Boutique onclick=setTagStyle("Dillards")>';
     }
 
     xmlhttp.open('GET',url,true);
@@ -60,7 +60,7 @@ function setTagStyle(newTagStyle) {
         if (xmlhttp.readyState == 4) {
         if (xmlhttp.status == 200) {
             tagXML = xmlhttp.responseText;
-            document.getElementById("tag").innerHTML = "Tag Style: " + button;
+            document.getElementById("tag").innerHTML = buttonHtml;
             printUPCTable();
         }}}; 
 }
@@ -101,7 +101,11 @@ function setRowsFromJson(jsonData) {
         
             //add entry in the rows list
             rows[i] = {"upc" : upc.upc, "qty" : upc.oounits};
-
+            
+            //if dept is available in the input then store it in the row field so
+            //that it can be used for validation later
+            if(upc.dept)
+                rows[i].dept = upc.dept;
         }
 }
 
@@ -142,11 +146,26 @@ function printUPCTable() {
         for (var i = 0; i < rows.length; i++)
         {
             upc = upcs[rows[i].upc];            
+            
+            //**Check for various Errors**//
+            var messages = [];
             if (!upc) {
-                alert("ERROR: UPC " + rows[i].upc + " does not exist on master UPC list in Google Docs"); 
+                messages.push("ERROR: UPC not found"); 
                 upc = getBlankUpc(rows[i]);
             }
+            if (upc.dept)
+                if (rows[i].dept)
+                    if (upc.dept != rows[i].dept) {
+                       messages.push("ERROR: Department Mis-match");
+                    }
+            var msg = "";
+            if(messages.length == 1)
+                msg = messages[0];
+            if(messages.length == 2)
+                msg = messages[0] + "<br>" + messages[1];
 
+
+            //**Build Table HTML**//
             html += "<tr>";
             html += "<td>" + (i+1) + "</td>";
             if ( tagStyle === 'Dillards' ) {
@@ -159,10 +178,11 @@ function printUPCTable() {
             html += "<td>" + upc.size + "</td>";
             html += "<td>" + upc.upc + "</td>";
             html += "<td>" + upc.unitretail + "</td>";
-            html += "<td><INPUT TYPE=text id=qty" + upc.upc + " VALUE= " + rows[i].qty + " size=2 style=text-align:right></td>";
+            html += "<td><input type=text id=qty" + upc.upc + " value= " + rows[i].qty + " size=2 style=text-align:right></td>";
             html += "<td><input type=button value=print onclick=printLabels(" + upc.upc + ")></td>";
-            html += "<td><span id=printed" + upc.upc + "></span></td>";
+            html += "<td><span id=printed" + upc.upc + "></span>" + msg + "</td>";
             html += "</tr>";
+
         }
 
         html += "</table>";

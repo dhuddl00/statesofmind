@@ -86,12 +86,15 @@ def getOrderListFromCsv(csvData):
     headings = lines[0].split(",")
     upcIndex = headings.index("UPCCode")
     qtyIndex = headings.index("QuantityOrdered")
+    deptIndex = headings.index("DepartmentNo")
     ordLines = []
     for r in range(1, len(lines)):
         cols = lines[r].split(",")
         ordLine = {}
         ordLine['upc'] = int(cols[upcIndex].replace("'","").replace('"',"").strip())
         ordLine['qty'] = int(cols[qtyIndex].replace("'","").replace('"',"").strip())
+        if deptIndex:
+            ordLine['dept'] = cols[deptIndex].replace("'","").replace('"',"").strip().zfill(4)
         ordLines.append(ordLine)
     
     return ordLines 
